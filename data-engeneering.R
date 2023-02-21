@@ -29,27 +29,23 @@ call_api <- function(url) {
   }
 }
 
-
-
-con <- dbConnect(
-  bigquery(),
-  project = "bigquery-public-data",
-  dataset = "baseball",
-  billing = "github-dashboard"
-)
-
-skeds <- tbl(con, "schedules")
-glimpse(skeds)
-
-available_teams <- select(skeds, homeTeamName) %>%
-  distinct() %>%
-  collect()
-
 # url <- "https://api.github.com/repos/boa50/r-cheat-sheet/commits?since=2023-02-19T13:10:23Z"
 
 url <- "https://api.github.com/repos/boa50/r-cheat-sheet/commits?author=boa50"
 
-
 df <- call_api(url)
 
-nrow(df)
+### Insertign data into the BigQuery table
+if (nrow(df) > 0) {
+  names(df) <- c("message", "executed_date")
+  df$executed_date <- as.POSIXct(stringr::str_replace_all(df$executed_date, "Z|T", " "))
+  
+  con <- dbConnect(
+    bigquery(),
+    project = "github-dashboard-378513",
+    dataset = "interactions",
+    billing = "github-dashboard-378513"
+  )
+  
+  dbWriteTable(con, "commits", df, append = TRUE)
+}
