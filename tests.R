@@ -31,24 +31,32 @@ theme_boa <- function() {
 names(df_commits) <- c("message", "executed_date", "repository")
 df_commits$executed_date <- as.POSIXct(stringr::str_replace_all(df_commits$executed_date, "Z|T", " "))
 
-df <- df_commits %>%
+df_commits <- df_commits %>%
   select(executed_date) %>% 
-  mutate(executed_date = as.Date(executed_date)) %>% 
-  count(executed_date) %>% 
-  mutate(weekday_number = wday(executed_date),
-         weekday = wday(executed_date, label = TRUE, locale = "en_AU.UTF-8"),
-         year = year(executed_date),
-         month = month(executed_date, label = TRUE, locale = "en_AU.UTF-8"),
-         week = week(executed_date)
-        )
+  mutate(commit_date = as.Date(executed_date)) %>% 
+  count(commit_date)
+
+min_date <- as.Date(min(df_commits$commit_date))
+commit_date <- seq(min_date, by = "day", length = Sys.Date() - min_date + 1)
+
+df <- as.data.frame(commit_date) %>% 
+  left_join(df_test, by = "commit_date") %>% 
+  mutate(
+    n = ifelse(is.na(n), 0, n),
+    weekday_number = wday(commit_date),
+    weekday = wday(commit_date, label = TRUE, locale = "en_AU.UTF-8"),
+    year = year(commit_date),
+    month = month(commit_date, label = TRUE, locale = "en_AU.UTF-8"),
+    week = week(commit_date)
+  ) 
+  
 
 # p <- df %>%
 df %>%
-  ggplot(aes(week, weekday, fill = n, text = executed_date)) + 
+  ggplot(aes(week, weekday, fill = n, text = commit_date)) + 
   geom_tile(height=0.7, width=0.7,) +
   facet_wrap(~year, ncol = 1, scales = "fixed") +
-  # facet_wrap(~year(date), ncol = 1) + 
-  scale_fill_gradient(low="#daeafa", high="#1976d2") +  
+  scale_fill_gradient(low="#fbfdfe", high="#1976d2") +  
   scale_y_discrete(expand = c(0, 0), limits = rev(c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))) +
   scale_x_continuous(expand = c(0, 0), limits = c(1, 53)) +
   labs(
