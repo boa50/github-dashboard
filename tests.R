@@ -42,7 +42,7 @@ commit_date <- seq(min_date, by = "day", length = Sys.Date() - min_date + 1)
 df <- as.data.frame(commit_date) %>% 
   left_join(df_test, by = "commit_date") %>% 
   mutate(
-    n = ifelse(is.na(n), 0, n),
+    commits = ifelse(is.na(n), 0, n),
     weekday_number = wday(commit_date),
     weekday = wday(commit_date, label = TRUE, locale = "en_AU.UTF-8"),
     year = year(commit_date),
@@ -53,8 +53,10 @@ df <- as.data.frame(commit_date) %>%
 
 # p <- df %>%
 df %>%
-  ggplot(aes(week, weekday, fill = n, text = commit_date)) + 
-  geom_tile(height=0.7, width=0.7,) +
+  ggplot(aes(week, weekday, fill = commits, text = commit_date)) + 
+  # geom_tile(height=0.7, width=0.7,) +
+  geom_rect(aes(xmin = week - .4, xmax = week + .4, 
+                ymin = weekday_number - .4, ymax = weekday_number + .4))+
   facet_wrap(~year, ncol = 1, scales = "fixed") +
   scale_fill_gradient(low="#fbfdfe", high="#1976d2") +  
   scale_y_discrete(expand = c(0, 0), limits = rev(c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))) +
