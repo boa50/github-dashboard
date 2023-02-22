@@ -104,7 +104,7 @@ insert_values <- function(df, con) {
 ############################# Program Execution ################################
 df_repositories <- get_repositories()
 
-# next_date <- get_next_date()
+next_date <- get_next_date()
 # next_date <- "1970-01-01T00:00:00Z"
 
 df_commits <- data.frame()
@@ -115,12 +115,8 @@ for (repo in df_repositories$name) {
   df_tmp <- get_commits(repo, next_date)
   df_tmp$repository <- repo
   df_commits <- rbind(df_commits, df_tmp)
-  
-  if (repo == "analise-sentimentos") {
-    break
-  }
 }
 
 rm(df_tmp)
 
-# insert_values(df_commits, con)
+insert_values(df_commits, con)
