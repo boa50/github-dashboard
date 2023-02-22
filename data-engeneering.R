@@ -22,7 +22,7 @@ call_api <- function(url) {
     add_headers("X-GitHub-Api-Version", "2022-11-28")
   )
   
-  if (status_code(get_details) == 200) {
+  if (status_code(response) == 200) {
     df <- as.data.frame(
       fromJSON(
         content(response, "text", encoding = "UTF-8"),
@@ -91,7 +91,7 @@ get_next_date <- function() {
 ### Insertign data into the BigQuery table
 insert_values <- function(df, con) {
   if (nrow(df) > 0) {
-    names(df) <- c("message", "executed_date")
+    names(df) <- c("message", "executed_date", "repository")
     df$executed_date <- as.POSIXct(stringr::str_replace_all(df$executed_date, "Z|T", " "))
     
     dbWriteTable(con, "commits", df, append = TRUE)
@@ -104,8 +104,23 @@ insert_values <- function(df, con) {
 ############################# Program Execution ################################
 df_repositories <- get_repositories()
 
-next_date <- get_next_date()
+# next_date <- get_next_date()
+# next_date <- "1970-01-01T00:00:00Z"
 
-df_commits <- get_commits(df_repositories[[2, 1]], next_date)
+df_commits <- data.frame()
 
-# insert_values(df, con)
+for (repo in df_repositories$name) {
+  message(repo)
+  
+  df_tmp <- get_commits(repo, next_date)
+  df_tmp$repository <- repo
+  df_commits <- rbind(df_commits, df_tmp)
+  
+  if (repo == "analise-sentimentos") {
+    break
+  }
+}
+
+rm(df_tmp)
+
+# insert_values(df_commits, con)
