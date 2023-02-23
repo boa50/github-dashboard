@@ -1,6 +1,7 @@
 library(plotly)
 library(ggplot2)
 library(dplyr)
+library(lubridate)
 
 my_colours <- list(
   title = "#616161",
@@ -40,10 +41,12 @@ min_date <- as.Date(min(df_commits$commit_date))
 commit_date <- seq(min_date, by = "day", length = Sys.Date() - min_date + 1)
 
 df <- as.data.frame(commit_date) %>% 
-  left_join(df_test, by = "commit_date") %>% 
+  left_join(df_commits, by = "commit_date") %>% 
   mutate(
     commits = ifelse(is.na(n), 0, n),
-    weekday_number = wday(commit_date),
+    weekday_number_rev = plyr::mapvalues(wday(commit_date),
+                                         from = c(1:7),
+                                         to = c(7:1)),
     weekday = wday(commit_date, label = TRUE, locale = "en_AU.UTF-8"),
     year = year(commit_date),
     month = month(commit_date, label = TRUE, locale = "en_AU.UTF-8"),
@@ -51,16 +54,17 @@ df <- as.data.frame(commit_date) %>%
   ) 
   
 
-# p <- df %>%
-df %>%
+p <- df %>%
+# df %>%
+  filter(year > 2021) %>% 
   ggplot(aes(week, weekday, fill = commits, text = commit_date)) + 
   # geom_tile(height=0.7, width=0.7,) +
-  geom_rect(aes(xmin = week - .4, xmax = week + .4, 
-                ymin = weekday_number - .4, ymax = weekday_number + .4))+
-  facet_wrap(~year, ncol = 1, scales = "fixed") +
-  scale_fill_gradient(low="#fbfdfe", high="#1976d2") +  
+  geom_rect(aes(xmin = week - .35, xmax = week + .35,
+                ymin = weekday_number_rev - .35, ymax = weekday_number_rev + .35))+
+  facet_wrap(~year, ncol = 1) +
+  scale_fill_gradient(low="#eeeeee", high="#1976d2") +  
   scale_y_discrete(expand = c(0, 0), limits = rev(c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))) +
-  scale_x_continuous(expand = c(0, 0), limits = c(1, 53)) +
+  scale_x_continuous(expand = c(0, 0), limits = c(0, 54)) +
   labs(
     title = "Time-Series Calendar Heatmap: AMZN Stock Prices",
     x = "Week",
@@ -69,4 +73,5 @@ df %>%
   ) +
   theme_boa()
 
-# ggplotly(p)
+ggplotly(p)
+
