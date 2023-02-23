@@ -49,16 +49,24 @@ df <- as.data.frame(commit_date) %>%
                                          to = c(7:1)),
     weekday = wday(commit_date, label = TRUE, locale = "en_AU.UTF-8"),
     year = year(commit_date),
-    month = month(commit_date, label = TRUE, locale = "en_AU.UTF-8"),
-    week = week(commit_date)
-  ) 
+    month = month(commit_date, label = TRUE, locale = "en_AU.UTF-8")
+  ) %>% 
+  group_by(year) %>%
+  mutate(
+    week_test = any(epiweek(commit_date) > 50 & month == "Jan"),
+    week = ifelse(week_test,
+                  ifelse(epiweek(commit_date) > 50 & month == "Jan",
+                         1,
+                         epiweek(commit_date) + 1),
+                  epiweek(commit_date))
+  ) %>% 
+  ungroup()
   
 
 p <- df %>%
 # df %>%
-  filter(year > 2021) %>% 
-  ggplot(aes(week, weekday, fill = commits, text = commit_date)) + 
-  # geom_tile(height=0.7, width=0.7,) +
+  filter(year >= 2020) %>% 
+  ggplot(aes(week, weekday, fill = commits, text = commit_date)) +
   geom_rect(aes(xmin = week - .35, xmax = week + .35,
                 ymin = weekday_number_rev - .35, ymax = weekday_number_rev + .35))+
   facet_wrap(~year, ncol = 1) +
@@ -66,7 +74,7 @@ p <- df %>%
   scale_y_discrete(expand = c(0, 0), limits = rev(c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))) +
   scale_x_continuous(expand = c(0, 0), limits = c(0, 54)) +
   labs(
-    title = "Time-Series Calendar Heatmap: AMZN Stock Prices",
+    title = "Commits History",
     x = "Week",
     y = "",
     fill = "Number of commits"
@@ -74,4 +82,3 @@ p <- df %>%
   theme_boa()
 
 ggplotly(p)
-
