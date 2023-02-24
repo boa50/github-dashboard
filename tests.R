@@ -54,18 +54,21 @@ df <- as.data.frame(commit_date) %>%
   group_by(year) %>%
   mutate(
     week_test = any(epiweek(commit_date) > 50 & month == "Jan"),
+    ### Fixing January dates that would show on the last column
     week = ifelse(week_test,
                   ifelse(epiweek(commit_date) > 50 & month == "Jan",
                          1,
                          epiweek(commit_date) + 1),
-                  epiweek(commit_date))
+                  epiweek(commit_date)),
+    ### Fixing December dates that would show on the first column
+    week = ifelse(week == 1 & month == "Dec", max(week) + 1, week)
   ) %>% 
   ungroup()
   
 
-p <- df %>%
-# df %>%
-  filter(year >= 2020) %>% 
+# p <- df %>%
+df %>%
+  filter(year >= 2018) %>% 
   ggplot(aes(week, weekday, fill = commits, text = commit_date)) +
   geom_rect(aes(xmin = week - .35, xmax = week + .35,
                 ymin = weekday_number_rev - .35, ymax = weekday_number_rev + .35))+
@@ -79,6 +82,9 @@ p <- df %>%
     y = "",
     fill = "Number of commits"
   ) +
-  theme_boa()
+  theme_boa() +
+  coord_fixed() +
+  guides(fill = guide_colourbar(label = FALSE,
+                                ticks = FALSE))
 
-ggplotly(p)
+# ggplotly(p)
