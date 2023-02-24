@@ -43,7 +43,8 @@ commit_date <- seq(min_date, by = "day", length = Sys.Date() - min_date + 1)
 df <- as.data.frame(commit_date) %>% 
   left_join(df_commits, by = "commit_date") %>% 
   mutate(
-    commits = ifelse(is.na(n), 0, n),
+    # commits = ifelse(is.na(n), 0, n),
+    commits = n,
     weekday_number_rev = plyr::mapvalues(wday(commit_date),
                                          from = c(1:7),
                                          to = c(7:1)),
@@ -73,21 +74,30 @@ df %>%
   geom_rect(aes(xmin = week - .35, xmax = week + .35,
                 ymin = weekday_number_rev - .35, ymax = weekday_number_rev + .35))+
   facet_wrap(~year, ncol = 1) +
-  scale_fill_gradient(low="#eeeeee", high="#1976d2") +  
-  scale_y_discrete(expand = c(0, 0), limits = rev(c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))) +
+  scale_fill_gradient(low="#cde3f9", high="#1976d2", na.value = "#f5f5f5") +  
+  scale_y_discrete(expand = c(0, 0), 
+                   limits = rev(c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))) +
   scale_x_continuous(expand = c(0, 0),
                      limits = c(0, 54),
                      breaks = c(2.5, 6.8, 11.2, 15.5, 19.8, 24.1, 28.4, 32.7, 37, 41.3, 45.6, 49.9),
                      labels = month.abb) +
-  labs(
-    title = "Commits History",
-    x = "",
-    y = "",
-    fill = "Number of commits"
-  ) +
+  labs(title = "Commits History") +
   theme_boa() +
   coord_fixed() +
-  guides(fill = guide_colourbar(label = FALSE,
-                                ticks = FALSE))
+  # guides(fill = guide_colourbar(title = NULL,
+  #                               label = TRUE,
+  #                               ticks = FALSE,
+  #                               barwidth = 0.5,
+  #                               barheight = 25)) +
+  theme(
+    legend.position = "none",
+    axis.title = element_blank(),
+    axis.line = element_blank(),
+    axis.ticks = element_blank(),
+    strip.text.x = element_text(colour = "black"),
+    strip.background.x = element_rect(linetype = 1, 
+                                      colour = "white", 
+                                      fill = "#f9f9f9")
+  )
 
 # ggplotly(p)
