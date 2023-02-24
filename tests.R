@@ -75,10 +75,13 @@ df %>%
   facet_wrap(~year, ncol = 1) +
   scale_fill_gradient(low="#eeeeee", high="#1976d2") +  
   scale_y_discrete(expand = c(0, 0), limits = rev(c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))) +
-  scale_x_continuous(expand = c(0, 0), limits = c(0, 54)) +
+  scale_x_continuous(expand = c(0, 0),
+                     limits = c(0, 54),
+                     breaks = c(2.5, 6.8, 11.2, 15.5, 19.8, 24.1, 28.4, 32.7, 37, 41.3, 45.6, 49.9),
+                     labels = month.abb) +
   labs(
     title = "Commits History",
-    x = "Week",
+    x = "",
     y = "",
     fill = "Number of commits"
   ) +
