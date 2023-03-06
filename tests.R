@@ -88,13 +88,15 @@ df %>%
   labs(title = "Commits History") +
   theme_boa() +
   coord_fixed() +
-  # guides(fill = guide_colourbar(title = NULL,
-  #                               label = TRUE,
-  #                               ticks = FALSE,
-  #                               barwidth = 0.5,
-  #                               barheight = 25)) +
+  guides(fill = guide_colourbar(title = "Commits",
+                                label = TRUE,
+                                ticks = FALSE,
+                                barwidth = 7,
+                                barheight = 0.5)) +
   theme(
-    legend.position = "none",
+    legend.position = c(1,0),
+    legend.justification = c(1, 2),
+    legend.direction = "horizontal",
     axis.title = element_blank(),
     axis.line = element_blank(),
     axis.ticks = element_blank(),
