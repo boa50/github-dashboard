@@ -21,8 +21,8 @@ theme_boa <- function() {
           axis.ticks = element_line(colour = my_colours$axis),
           axis.text = element_text(colour = my_colours$axis),
           axis.title = element_text(colour = my_colours$axis),
-          panel.background = element_rect(fill='transparent'),
-          plot.background = element_rect(fill='transparent', color=NA)
+          panel.background = element_rect(fill = "transparent"),
+          plot.background = element_rect(fill = "transparent", colour = NA)
     )
 }
 
@@ -78,7 +78,7 @@ df %>%
   geom_rect(aes(xmin = week - .35, xmax = week + .35,
                 ymin = weekday_number_rev - .35, ymax = weekday_number_rev + .35))+
   facet_wrap(~year, ncol = 1) +
-  scale_fill_gradient(low="#cde3f9", high="#1976d2", na.value = "#f5f5f5") +  
+  scale_fill_gradient(low = "#cde3f9", high = "#1976d2", na.value = "#eeeeee") +  
   scale_y_discrete(expand = c(0, 0), 
                    limits = rev(c("Sun","Mon","Tue","Wed","Thu","Fri","Sat"))) +
   scale_x_continuous(expand = c(0, 0),
@@ -98,10 +98,12 @@ df %>%
     axis.title = element_blank(),
     axis.line = element_blank(),
     axis.ticks = element_blank(),
-    strip.text.x = element_text(colour = "black"),
-    strip.background.x = element_rect(linetype = 1, 
+    strip.text.x = element_text(colour = "black", 
+                                margin = margin(t = 12, b = 12)),
+    strip.background.x = element_rect(linetype = 1,
+                                      linewidth = 7,
                                       colour = "white", 
-                                      fill = "#f9f9f9")
+                                      fill = "#e0e0e0")
   )
 
 # ggplotly(p)
