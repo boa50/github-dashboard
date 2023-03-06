@@ -66,10 +66,14 @@ df <- as.data.frame(commit_date) %>%
   ) %>% 
   ungroup()
   
+# Variables to show only the last years
+n_years <- 3
+current_year <- as.integer(format(Sys.Date(), "%Y"))
+first_year <- current_year - n_years + 1
 
 # p <- df %>%
 df %>%
-  filter(year >= 2018) %>% 
+  filter(year >= first_year) %>% 
   ggplot(aes(week, weekday, fill = commits, text = commit_date)) +
   geom_rect(aes(xmin = week - .35, xmax = week + .35,
                 ymin = weekday_number_rev - .35, ymax = weekday_number_rev + .35))+
