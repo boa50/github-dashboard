@@ -29,7 +29,7 @@ theme_boa <- function() {
 ### Reference
 # http://www.columbia.edu/~sg3637/blog/Time_Series_Heatmaps.html
 
-names(df_commits) <- c("message", "executed_date", "repository")
+names(df_commits) <- c("message", "commit_date", "repository")
 df_commits$executed_date <- as.POSIXct(stringr::str_replace_all(df_commits$executed_date, "Z|T", " "))
 
 df_commits <- df_commits %>%

@@ -48,6 +48,7 @@ get_repositories <- function() {
       df_repositories <- rbind(df_repositories, df["name"])
     }
     
+    ### Checking if it has another page to be loaded
     if (nrow(df) < 30) {
       break
     }
@@ -80,10 +81,11 @@ get_next_date <- function() {
   tb_commits <- tbl(con, "commits")
   
   last_date <- tb_commits %>%
-    summarise(last_date = max(executed_date, na.rm = TRUE)) %>%
+    summarise(last_date = max(commit_date, na.rm = TRUE)) %>%
     collect()
   
   next_date <- format(last_date[[1]] + 1, "%Y-%m-%dT%H:%M:%SZ")
+  message(paste("Next date:", next_date))
   
   return(next_date)
 }
@@ -91,8 +93,8 @@ get_next_date <- function() {
 ### Insertign data into the BigQuery table
 insert_values <- function(df, con) {
   if (nrow(df) > 0) {
-    names(df) <- c("message", "executed_date", "repository")
-    df$executed_date <- as.POSIXct(stringr::str_replace_all(df$executed_date, "Z|T", " "))
+    names(df) <- c("message", "commit_date", "repository")
+    df$commit_date <- as.POSIXct(stringr::str_replace_all(df$commit_date, "Z|T", " "))
     
     dbWriteTable(con, "commits", df, append = TRUE)
   } else {
@@ -105,6 +107,7 @@ insert_values <- function(df, con) {
 df_repositories <- get_repositories()
 
 next_date <- get_next_date()
+### Line above only for the first load
 # next_date <- "1970-01-01T00:00:00Z"
 
 df_commits <- data.frame()
@@ -113,10 +116,14 @@ for (repo in df_repositories$name) {
   message(repo)
   
   df_tmp <- get_commits(repo, next_date)
-  df_tmp$repository <- repo
-  df_commits <- rbind(df_commits, df_tmp)
+  if (nrow(df_tmp) > 0) {
+    df_tmp$repository <- repo
+    df_commits <- rbind(df_commits, df_tmp)
+  }
 }
 
-rm(df_tmp)
-
 insert_values(df_commits, con)
+
+rm(repo, next_date, df_tmp, df_commits, df_repositories,
+   call_api, get_commits, get_next_date, get_repositories, insert_values,
+   con)
